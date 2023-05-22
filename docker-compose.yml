@@ -65,6 +65,24 @@ services:
       KAFKA_DEFAULT_REPLICATION_FACTOR: 3
       KAFKA_NUM_PARTITIONS: 3
 
+
+  control-center:
+    image: confluentinc/cp-enterprise-control-center:6.0.1
+    container_name: kafka-control-center
+    hostname: control-center
+    ports:
+      - "9021:9021"
+    environment:
+      CONTROL_CENTER_BOOTSTRAP_SERVERS: 'broker0:29092,broker1:29093,broker2:29094'
+      CONTROL_CENTER_REPLICATION_FACTOR: 1
+      PORT: 9021
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "control-center", "9021" ]
+      timeout: 45s
+      interval: 10s
+      retries: 10
+
+
   schema-registry:
     image: confluentinc/cp-schema-registry:6.1.1
     hostname: schema-registry
@@ -110,3 +128,10 @@ services:
     container_name: cli-tools
     entrypoint: "sleep infinity"
     restart: always
+
+  python-client:
+    build: ./python-api
+    restart: always
+    container_name: python-client
+    volumes:
+      - ./python-api/src:/app
