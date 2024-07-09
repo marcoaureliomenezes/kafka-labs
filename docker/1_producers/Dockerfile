@@ -8,3 +8,4 @@ RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 ENTRYPOINT [ "sleep", "infinity"]
+
