@@ -1,0 +1,2 @@
+rules:
+  - pattern: kafka_server<type=(.+), name=(.+)><>(.+)

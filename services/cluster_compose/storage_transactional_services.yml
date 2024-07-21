@@ -1,0 +1,57 @@
+version: '3'
+
+x-common-network: &common-network
+  networks:
+    - learning_kafka
+
+x-default-healthcheck: &default_healthcheck
+  interval: 30s
+  timeout: 10s
+  retries: 3
+
+#################################################################
+################    DEFINIÇÃO DOS SERVIÇOS    ###################
+#################################################################
+
+services:
+
+  postgres:
+    build: ../docker/integration/postgres
+    container_name: postgres
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    ports:
+      - "15432:5432"
+    <<: *common-network
+    volumes:
+      - 'postgres-kafka-data:/var/lib/postgresql/data'
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-U", "postgres" ]
+      <<: *default_healthcheck
+
+
+  scylladb:
+    build: ../docker/integration/scylladb
+    container_name: scylladb
+    restart: always
+    <<: *common-network
+    ports:
+      - "9042:9042"
+    volumes:
+      - 'scylla-kafka-data:/var/lib/scylla'
+    healthcheck:
+      test: [ "CMD", "cqlsh", "scylladb", "-e", "DESCRIBE KEYSPACES" ]
+      <<: *default_healthcheck
+
+
+networks:
+  learning_kafka:
+    name: learning_kafka
+
+volumes:
+  scylla-kafka-data:
+    driver: local
+  postgres-kafka-data:
+    driver: local
+  

@@ -2,7 +2,6 @@
 
 # Compacted Topics:
 
-
 Compacted Topics são tópicos que mantém apenas a última versão de uma chave específica.
 Ou seja, se uma chave for atualizada, a versão anterior será removida do tópico.
 

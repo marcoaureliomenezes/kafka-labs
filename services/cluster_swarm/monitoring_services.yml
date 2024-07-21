@@ -1,0 +1,185 @@
+version: '3'
+
+##########################################################################################
+################    DEFAULT CONFIG FOR NODE EXPORTER AND CADVISOR    #####################
+
+x-common-exporters-default: &node_exporter_commons
+  image: quay.io/prometheus/node-exporter:latest
+  command:
+    - '--path.rootfs=/host'
+  pid: host
+  volumes:
+    - '/:/host:ro,rslave'
+  networks:
+    - dm_cluster_prod_ops
+
+x-common-cadvisor-default: &cadvisor_commons
+  image: gcr.io/cadvisor/cadvisor:v0.44.1-test
+  volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    - /dev/disk/:/dev/disk:ro
+  command:
+    - '--enable_metrics=advtcp,app,cpu,cpuLoad,cpu_topology,disk,diskIO,memory,memory_numa,network'
+
+##########################################################################################
+#########################    DEPLOYMENT CONFIGS FOR NODES    #############################
+
+x-common-network: &common_network
+  networks:
+    - cluster_swarm_monitoring
+
+x-common-restart-default: &common_restart_policy
+  restart_policy:
+    condition: on-failure
+
+x-common-deploy-master: &common_deploy_master
+  <<: *common_network
+  deploy:
+    <<: *common_restart_policy
+    placement:
+      constraints: [node.hostname == dadaia-desktop]
+
+x-common-deploy-worker-1: &common_deploy_worker_1
+  <<: *common_network
+  deploy:
+    <<: *common_restart_policy
+    placement:
+      constraints: [node.hostname == dadaia-HP-ZBook-15-G2]
+
+x-common-deploy-worker-2: &common_deploy_worker_2
+  <<: *common_network
+  deploy:
+    <<: *common_restart_policy
+    placement:
+      constraints: [node.hostname == dadaia-server-2]
+
+x-common-deploy-worker-3: &common_deploy_worker_3
+  <<: *common_network
+  deploy:
+    <<: *common_restart_policy
+    placement:
+      constraints: [node.hostname == dadaia-server]
+
+
+##########################################################################################
+################################    SERVICES CONFIG    ###################################
+
+services:
+
+  prometheus:
+    image: marcoaureliomenezes/labs-prometheus:1.0.0
+    hostname: prometheus
+    <<: *common_deploy_master
+    ports:
+      - 9090:9090
+    volumes:
+      - ./prometheus-conf.yml:/etc/prometheus/prometheus.yml
+      - prometheus_labs_vol_prod_data:/prometheus
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "localhost", "9090" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  grafana:
+    image: grafana/grafana
+    <<: *common_deploy_master
+    ports:
+      - 3000:3000
+    healthcheck:
+      test: [ "CMD", "nc", "-z", "prometheus", "9090" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    volumes:
+      - grafana_labs_vol_prod_data:/var/lib/grafana
+
+  ########################################################################################
+
+  kafka-exporter:
+    image: danielqsj/kafka-exporter 
+    container_name: kafka-exporter
+    command: ["--kafka.server=broker-1:29092" ,"--kafka.server=broker-2:29093" ,"--kafka.server=broker-3:29094"]
+    <<: *common_deploy_worker_1
+    networks:
+      - cluster_swarm_monitoring
+      - cluster_swarm_kafka
+    ports:
+      - 9308:9308
+
+  ########################################################################################
+  #####################    MONITORING DOCKER WITH CADVISOR    ############################
+
+  cadvisor_master:
+    <<: *cadvisor_commons
+    ports:
+      - 38080:8080
+    <<: *common_deploy_master
+
+  # MONITORING DOCKER SWARM CLUSTER ---> WORKER 1
+  cadvisor_worker_1:
+    <<: *cadvisor_commons
+    ports:
+      - 38081:8080
+    <<: *common_deploy_worker_1
+
+  # MONITORING DOCKER SWARM CLUSTER ---> WORKER 2
+  cadvisor_worker_2:
+    <<: *cadvisor_commons
+    ports:
+      - 38082:8080
+    <<: *common_deploy_worker_2
+
+  # MONITORING DOCKER SWARM CLUSTER ---> WORKER 3
+  cadvisor_worker_3:
+    <<: *cadvisor_commons
+    ports:
+      - 38083:8080
+    <<: *common_deploy_worker_3
+
+
+  ########################################################################################
+  #####################    MONITORING SERVERS SWARM CLUSTER    ###########################
+
+  node_exporter_master:
+    <<: *node_exporter_commons
+    networks:
+      - cluster_swarm_monitoring
+    <<: *common_deploy_master
+
+  node_exporter_worker_1:
+    <<: *node_exporter_commons
+    networks:
+      - cluster_swarm_monitoring
+    <<: *common_deploy_worker_1
+
+  node_exporter_worker_2:
+    <<: *node_exporter_commons
+    networks:
+      - cluster_swarm_monitoring
+    <<: *common_deploy_worker_2
+
+  node_exporter_worker_3:
+    <<: *node_exporter_commons
+    networks:
+      - cluster_swarm_monitoring
+    <<: *common_deploy_worker_3
+
+############################    END OF SERVICES CONFIG    ################################
+##########################################################################################
+
+volumes:
+  prometheus_labs_vol_prod_data:
+  grafana_labs_vol_prod_data:
+
+
+networks:
+  cluster_swarm_monitoring:
+    external: true
+  cluster_swarm_kafka:
+    external: true
