@@ -3,12 +3,12 @@ version: '3'
 
 x-common-network: &common_network
   networks:
-    - learning_kafka
+    - cluster_compose_kafka
 
 services:
 
   simple_producer:
-    build: ../../docker/1_producers
+    build: ../../docker/kafka_apps/1_producers
     container_name: simple_producer
     environment:
       KAFKA_BROKERS: ${KAFKA_BROKERS_DEV}
@@ -18,37 +18,57 @@ services:
     <<: *common_network
     restart: always
     volumes:
-      - ../../docker/1_producers/src:/app
-    #entrypoint: "python /app/1_simple_producer.py"
+      - ../../docker/kafka_apps/1_producers/src:/app
+    entrypoint: "python /app/1_simple_producer.py"
 
-  simple_consumer_1:
-    build: ../../docker/2_consumers
-    container_name: simple_consumer_1
+
+  json_producer:
+    build: ../../docker/kafka_apps/1_producers
+    container_name: json_producer
     environment:
       KAFKA_BROKERS: ${KAFKA_BROKERS_DEV}
       SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
-      KAFKA_TOPIC: 'simple.clients.bank'
-      GROUP_ID: 'simple_consumer_2'
+      KAFKA_TOPIC: 'json_serialized.clients'
+      FREQUENCY: 0.01
     <<: *common_network
     restart: always
     volumes:
-      - ../../docker/2_consumers/src:/app
-    #entrypoint: "python /app/2_at_least_once_proc.py"
+      - ../../docker/kafka_apps/1_producers/src:/app
+    entrypoint: "python -u /app/2_json_producer.py"
 
 
-  # avro_producer:
-  #   build: ../../docker/1_producers
-  #   container_name: avro_producer
+  avro_producer:
+    build: ../../docker/kafka_apps/1_producers
+    container_name: avro_producer
+    environment:
+      KAFKA_BROKERS: ${KAFKA_BROKERS_DEV}
+      SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      KAFKA_TOPIC: 'avro_serialized.clients'
+      FREQUENCY: 0.01
+    <<: *common_network
+    restart: always
+    volumes:
+      - ../../docker/kafka_apps/1_producers/src:/app
+    entrypoint: "python -u /app/3_avro_producer.py"
+
+
+
+  # simple_consumer_1:
+  #   build: ../../docker/2_consumers
+  #   container_name: simple_consumer_1
   #   environment:
   #     KAFKA_BROKERS: ${KAFKA_BROKERS_DEV}
   #     SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
-  #     KAFKA_TOPIC: 'avro_serialized.clients'
-  #     FREQUENCY: 0.0001
+  #     KAFKA_TOPIC: 'simple.clients.bank'
+  #     GROUP_ID: 'simple_consumer_2'
   #   <<: *common_network
   #   restart: always
   #   volumes:
-  #     - ../../docker/1_producers/src:/app
-  #   entrypoint: "python /app/2_avro_producer.py"
+  #     - ../../docker/2_consumers/src:/app
+    #entrypoint: "python /app/2_at_least_once_proc.py"
+
+
+
 
   # avro_consumer:
   #   build: ../../docker/2_consumers
@@ -94,5 +114,5 @@ services:
 
 
 networks:
-  learning_kafka:
-    name: learning_kafka
+  cluster_compose_kafka:
+    name: cluster_compose_kafka

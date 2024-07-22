@@ -3,3 +3,4 @@ confluent-kafka
 faker
 fastavro
 requests
+jsonschema

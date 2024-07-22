@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "User",
+  "description": "Schema Json Client",
+  "type": "object",
+  "properties":
+  {
+    "id": {
+      "description": "The unique identifier for a user",
+      "type": "integer"
+    },
+    "name": {
+      "description": "User's name",
+      "type": "string"
+    },
+    "cpf": {
+      "description": "User's CPF",
+      "type": "string"
+    },
+    "graduation": {
+      "description": "User's graduation",
+      "type": "string"
+    },
+    "status_civil": {
+      "description": "User's status civil",
+      "type": "string"
+    },
+    "phones": {
+      "description": "User's phones",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "birthdate": {
+      "description": "User's birthdate",
+      "type": "string"
+    },
+    "address": {
+      "description": "User's address",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "logradouro": {
+            "description": "User's address logradouro",
+            "type": "string"
+          },
+          "bairro": {
+            "description": "User's address bairro",
+            "type": "string"
+          },
+          "cidade": {
+            "description": "User's address cidade",
+            "type": "string"
+          },
+          "estado": {
+            "description": "User's address estado",
+            "type": "string"
+          }
+        },
+        "required": ["logradouro", "bairro", "cidade", "estado"]
+      }
+    }
+  }
+}

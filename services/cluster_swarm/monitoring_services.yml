@@ -10,8 +10,6 @@ x-common-exporters-default: &node_exporter_commons
   pid: host
   volumes:
     - '/:/host:ro,rslave'
-  networks:
-    - dm_cluster_prod_ops
 
 x-common-cadvisor-default: &cadvisor_commons
   image: gcr.io/cadvisor/cadvisor:v0.44.1-test

@@ -1,8 +1,6 @@
 ##########################################################################################
 
 x-common-log-config: &default_config
-  networks:
-    - layer_batch_prod
   logging:
     driver: "json-file"
     options:

@@ -1,9 +1,9 @@
 ---
 version: '3'
 
-x-common-network: &common-network
+x-common-network: &common_network
   networks:
-    - learning_kafka
+    - cluster_compose_kafka
 
 x-default-healthcheck: &default_healthcheck
   interval: 10s
@@ -16,7 +16,7 @@ services:
     hostname: zookeeper
     container_name: zookeeper
     restart: always
-    <<: *common-network
+    <<: *common_network
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
@@ -40,7 +40,7 @@ services:
     hostname: broker
     container_name: broker
     restart: on-failure
-    <<: *common-network
+    <<: *common_network
     depends_on:
       - zookeeper
     ports:
@@ -79,7 +79,7 @@ services:
     container_name: schema-registry
     depends_on:
       - broker
-    <<: *common-network
+    <<: *common_network
     ports:
       - "8081:8081"
     environment:
@@ -89,11 +89,13 @@ services:
       SCHEMA_REGISTRY_SCHEMA_COMPATIBILITY_LEVEL: FULL
 
   connect:
-    build: ../../docker/integration/kafka-connect
+    build: ../../docker/kafka-connect
     hostname: connect
     container_name: connect
     restart: on-failure
-    <<: *common-network
+    networks:
+      - cluster_compose_kafka
+      - cluster_compose_hadoop
     depends_on:
       - broker
       - schema-registry
@@ -124,7 +126,7 @@ services:
     image: confluentinc/cp-enterprise-control-center:7.5.0
     hostname: control-center
     container_name: control-center
-    <<: *common-network
+    <<: *common_network
     depends_on:
       - broker
       - schema-registry
@@ -152,5 +154,7 @@ volumes:
   learning-kafka-secrets:
 
 networks:
-  learning_kafka:
-    name: learning_kafka
+  cluster_compose_kafka:
+    name: cluster_compose_kafka
+  cluster_compose_hadoop:
+    name: cluster_compose_hadoop

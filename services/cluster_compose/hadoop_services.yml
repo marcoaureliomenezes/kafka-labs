@@ -43,7 +43,7 @@ services:
     ports:
       - 9864:9864
     volumes:
-      - hadoop_labs_datanode_vol:/hadoop/dfs/data
+      - hadoop_labs_datanode_dev_vol:/hadoop/dfs/data
     environment:
       SERVICE_PRECONDITION: "namenode:9870"
     env_file:
@@ -141,8 +141,8 @@ services:
       <<: *default_healthcheck
 
 volumes:
-  hadoop_labs_namenode_vol:
-  hadoop_labs_datanode_vol:
+  hadoop_labs_namenode_dev_vol:
+  hadoop_labs_datanode_dev_vol:
   hadoop_labs_historyserver_dev_vol:
   hadoop_labs_postgres_dev_vol:
 

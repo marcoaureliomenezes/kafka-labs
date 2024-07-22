@@ -19,7 +19,7 @@ def acked(err, msg):
 
 if __name__ == '__main__':
 
-  FREQ = float(os.getenv('FREQUENCY')) / 10000
+  FREQ = float(os.getenv('FREQUENCY'))
   KAFKA_BROKERS = os.getenv('KAFKA_BROKERS')
   TOPIC_NAME = os.getenv('KAFKA_TOPIC')
   

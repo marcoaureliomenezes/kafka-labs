@@ -1,0 +1,46 @@
+{
+  "type": "record",
+  "name": "Client avro schema",
+  "fields": [
+    {
+      "name": "id", 
+      "type": "int"
+    },{
+      "name": "name",
+      "type": "string"
+    },{
+      "name": "cpf",
+      "type": "string"
+    },{
+      "name": "graduation",
+      "type": "string"
+    },{
+      "name": "status_civil",
+      "type": "string"
+    },{
+      "name": "phones",
+      "type": {
+        "type": "array", 
+        "items": "string"
+        }
+    },{
+      "name": "birthdate",
+      "type": "string"
+    },{
+      "name": "address",
+      "type": {
+        "type": "array",
+        "items": {
+          "type": "record",
+          "name": "Address",
+          "fields": [
+            {"name": "logradouro", "type": "string"},
+            {"name": "bairro", "type": "string"},
+            {"name": "cidade", "type": "string"},
+            {"name": "estado", "type": "string"}
+          ]
+        }
+      }
+    }
+  ]
+}

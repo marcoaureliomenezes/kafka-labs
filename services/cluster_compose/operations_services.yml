@@ -2,7 +2,7 @@ version: '3'
 
 x-common-networks: &common_networks
   networks:
-    - learning_kafka
+    - cluster_compose_kafka
 
 ##########################################################################################
 ################################    SERVICES CONFIG    ###################################
@@ -85,5 +85,5 @@ volumes:
   grafana-dev-data:
 
 networks:
-  learning_kafka:
-    name: learning_kafka
+  cluster_compose_kafka:
+    name: cluster_compose_kafka

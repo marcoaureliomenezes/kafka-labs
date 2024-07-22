@@ -43,8 +43,6 @@ x-common-deploy-worker-3: &common_deploy_worker_3
 ##########################################################################################
 #####################    NETWORK AND KAFKA CONFIGS    ####################################
 
-
-
 x-default-healthcheck: &default_healthcheck
   interval: 10s
   timeout: 10s

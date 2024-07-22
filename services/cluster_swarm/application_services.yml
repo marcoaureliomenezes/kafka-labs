@@ -1,0 +1,36 @@
+---
+version: '3'
+
+x-common-network: &common_network
+  networks:
+    - cluster_swarm_kafka
+
+services:
+
+  simple_producer:
+    image: marcoaureliomenezes/producer-client:1.0.0
+    environment:
+      KAFKA_BROKERS: broker-1:29092,broker-2:29093,broker-3:29094
+      SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      KAFKA_TOPIC: 'simple.clients.bank'
+      FREQUENCY: 0.1
+    <<: *common_network
+    restart: always
+    entrypoint: "python /app/1_simple_producer.py"
+
+
+  avro_producer:
+    image: marcoaureliomenezes/producer-client:1.0.0
+    container_name: avro_producer
+    environment:
+      KAFKA_BROKERS: broker-1:29092,broker-2:29093,broker-3:29094
+      SCHEMA_REGISTRY_URL: 'http://schema-registry:8081'
+      KAFKA_TOPIC: 'avro_serialized.clients'
+      FREQUENCY: 0.1
+    <<: *common_network
+    restart: always
+    entrypoint: "python -u /app/2_avro_producer.py"
+
+networks:
+  cluster_swarm_kafka:
+    external: true
